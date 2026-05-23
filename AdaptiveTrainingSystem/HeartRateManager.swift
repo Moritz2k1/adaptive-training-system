@@ -8,7 +8,7 @@
 import CoreBluetooth
 import Combine
 
-class HeartRateManager: NSObject {
+class HeartRateManager: NSObject, ObservableObject {
     
     // Constants
     let HEART_RATE_SERVICE = CBUUID(string: "180D")
@@ -19,8 +19,8 @@ class HeartRateManager: NSObject {
     private var polarH10 : CBPeripheral?
     
     // Observables in the UI
-    @Published var statusText = "Ready"
-    @Published var heartRate: Int?
+    @Published var statusText: String = "Ready"
+    @Published var heartRate: Int = 0
     @Published var rrIntervals: [Double] = []
     @Published var isConnected: Bool = false
     @Published var isScanning: Bool = false
