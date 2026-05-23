@@ -35,8 +35,9 @@ class HeartRateManager: NSObject {
     
 }
 
-extension HeartRateManager : CBCentralManagerDelegate {
+extension HeartRateManager: CBCentralManagerDelegate {
     
+    // Called when Bluetooth status changes
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
         switch central.state {
         case .poweredOn:
@@ -50,5 +51,37 @@ extension HeartRateManager : CBCentralManagerDelegate {
         default:
             statusText = "Bluetooth not available"
         }
+    }
+    
+    // Called when device has been found
+    func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral, advertisementData: [String: Any], rssi RSSI: NSNumber) {
+        
+        // Guard constant for name
+        guard let peripheralName = peripheral.name, peripheralName.contains("Polar H10") else { return }
+        
+        statusText = "H10 found: \(peripheralName)"
+        polarH10 = peripheral
+        centralManager.stopScan()
+        
+        // Direct connection
+        centralManager.connect(peripheral)
+    }
+    
+    // Connection successful
+    func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
+        statusText = "Connected"
+        isConnected = true
+        peripheral.delegate = self
+        
+        // Search for HR Services
+        peripheral.discoverServices([HEART_RATE])
+    }
+    
+    // Disconnect - reset values
+    func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
+        statusText = "Disconnected"
+        isConnected = false
+        heartRate = 0;
+        rrInterval = []
     }
 }
