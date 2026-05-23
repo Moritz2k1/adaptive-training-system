@@ -11,7 +11,7 @@ import Combine
 class HeartRateManager: NSObject {
     
     // Constants
-    let HEART_RATE = CBUUID(string: "180D")
+    let HEART_RATE_SERVICE = CBUUID(string: "180D")
     let BT_CHARACTERISTIC = CBUUID(string: "2A37")
     
     // Variables
@@ -21,7 +21,7 @@ class HeartRateManager: NSObject {
     // Observables in the UI
     @Published var statusText = "Ready"
     @Published var heartRate: Int?
-    @Published var rrInterval: [Double] = []
+    @Published var rrIntervals: [Double] = []
     @Published var isConnected: Bool = false
     @Published var isScanning: Bool = false
     
@@ -32,7 +32,59 @@ class HeartRateManager: NSObject {
         centralManager = CBCentralManager(delegate: self, queue: nil)
     }
     
+    func startScanning() {
+        guard centralManager.state == .poweredOn else {
+            statusText = "Bluetooth not powered on"
+            return
+        }
+        
+        isScanning = true
+        statusText = "Searching for Polar H10"
+        // Only look for devices with HR services
+        centralManager.scanForPeripherals(withServices: [HEART_RATE_SERVICE])
+    }
     
+    func stopScanning() {
+        centralManager.stopScan()
+        isScanning = false
+    }
+    
+    // Calculate RR-Intervals
+    private func parseHeartRateData(_ data: Data) {
+        let flags = data[0]
+        
+        // Bit 0 determines if HR is saved as UInt8 or UInt16
+        let hrFormat16Bit = (flags & 0x01) != 0
+        let hrValue: Int
+        
+        if hrFormat16Bit {
+            hrValue = Int(data[1]) | Int(data[2]) << 8
+        } else {
+            hrValue = Int(data[1])
+        }
+        
+        heartRate = hrValue
+        
+        // Bit 4 determines RR-Intervals
+        let rrThere = (flags & 0x10) != 0
+        guard rrThere else { return }
+        
+        // RR=Intervalls start after HR
+        let rrOffset = hrFormat16Bit ? 3 : 2
+        var rrs: [Double] = []
+        var i = rrOffset
+        
+        while (i+1 < data.count) {
+            // Convert to ms
+            let rrRaw = Int(data[i]) | Int(data[i+1]) << 8
+            let rrMS = Double(rrRaw) / 1024.0 * 1000.0
+            rrs.append(rrMS)
+            i += 2
+        }
+        
+        rrIntervals = rrs
+        print("HR: \(hrValue) bpm | RR: \(rrs.map { Int($0) }) ms")
+    }
 }
 
 extension HeartRateManager: CBCentralManagerDelegate {
@@ -54,7 +106,10 @@ extension HeartRateManager: CBCentralManagerDelegate {
     }
     
     // Called when device has been found
-    func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral, advertisementData: [String: Any], rssi RSSI: NSNumber) {
+    func centralManager(_ central: CBCentralManager,
+                        didDiscover peripheral: CBPeripheral,
+                        advertisementData: [String: Any],
+                        rssi RSSI: NSNumber) {
         
         // Guard constant for name
         guard let peripheralName = peripheral.name, peripheralName.contains("Polar H10") else { return }
@@ -74,7 +129,7 @@ extension HeartRateManager: CBCentralManagerDelegate {
         peripheral.delegate = self
         
         // Search for HR Services
-        peripheral.discoverServices([HEART_RATE])
+        peripheral.discoverServices([HEART_RATE_SERVICE])
     }
     
     // Disconnect - reset values
@@ -82,7 +137,7 @@ extension HeartRateManager: CBCentralManagerDelegate {
         statusText = "Disconnected"
         isConnected = false
         heartRate = 0;
-        rrInterval = []
+        rrIntervals = []
     }
 }
 
@@ -97,7 +152,7 @@ extension HeartRateManager: CBPeripheralDelegate {
         
         // Iterate over services
         for service in services {
-            if (service.uuid == HEART_RATE) {
+            if (service.uuid == HEART_RATE_SERVICE) {
                 peripheral.discoverCharacteristics([BT_CHARACTERISTIC], for: service)
             }
         }
@@ -118,5 +173,14 @@ extension HeartRateManager: CBPeripheralDelegate {
                 statusText = "Heart Rate Stream active"
             }
         }
+    }
+    
+    // Received new data
+    func peripheral(_ peripheral: CBPeripheral,
+                    didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
+        
+        guard characteristic.uuid == BT_CHARACTERISTIC,
+        let newData = characteristic.value else { return }
+        parseHeartRateData(newData)
     }
 }
