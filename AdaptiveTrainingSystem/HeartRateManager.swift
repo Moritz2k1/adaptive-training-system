@@ -85,3 +85,38 @@ extension HeartRateManager: CBCentralManagerDelegate {
         rrInterval = []
     }
 }
+
+extension HeartRateManager: CBPeripheralDelegate {
+    
+    // Service found
+    func peripheral(_ peripheral: CBPeripheral,
+                    didDiscoverServices error: Error?) {
+        
+        // All services
+        guard let services = peripheral.services else { return }
+        
+        // Iterate over services
+        for service in services {
+            if (service.uuid == HEART_RATE) {
+                peripheral.discoverCharacteristics([BT_CHARACTERISTIC], for: service)
+            }
+        }
+    }
+    
+    func peripheral(_ peripheral: CBPeripheral,
+                    didDiscoverCharacteristicsFor service: CBService,
+                    error: Error?) {
+        
+        // All characteristics
+        guard let characteristics = service.characteristics else { return }
+        
+        // Iterate over characteristics
+        for characteristic in characteristics {
+            if (characteristic.uuid == BT_CHARACTERISTIC) {
+                // Activate notifications
+                peripheral.setNotifyValue(true, for: characteristic)
+                statusText = "Heart Rate Stream active"
+            }
+        }
+    }
+}
