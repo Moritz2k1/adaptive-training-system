@@ -114,7 +114,7 @@ extension CoreBluetoothService: CBCentralManagerDelegate {
                         advertisementData: [String: Any],
                         rssi RSSI: NSNumber) {
         
-        // Guard constant for name
+        // Guard constant for peripheral name
         guard let peripheralName = peripheral.name, Configuration.supportedDevices.contains(where: { device in peripheralName.contains(device) }) else { return }
         
         self.peripheral = peripheral

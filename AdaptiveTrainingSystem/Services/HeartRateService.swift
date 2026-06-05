@@ -15,7 +15,7 @@ protocol HeartRateService : AnyObject {
     var statusText: String { get }
     var isScanning: Bool { get }
     
-    // Publisher for reactive Updates in UI
+    // @Published cannot be used in protocol
     var heartRatePublisher: AnyPublisher<Int, Never> { get }
     var rrIntervalsPublisher: AnyPublisher<[Double], Never> { get }
     var isConnectedPublisher: AnyPublisher<Bool, Never> { get }
