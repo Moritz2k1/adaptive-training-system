@@ -19,5 +19,24 @@ class Feedback : ObservableObject {
         let zoneMax = zone.maxHeartRate(userMaxHeartRate: userMaxHeartRate)
         
         guard currentHeartRate > 0 else { return }
+        
+        // Check cooldown
+        guard Date().timeIntervalSince(lastFeedback) >= Configuration.feedbackInterval else { return }
+        
+        if (currentHeartRate < zoneMin) {
+            speak("Faster")
+        }
+        else if (currentHeartRate > zoneMax) {
+            speak("Slower")
+        }
+    }
+    
+    private func speak(_ message: String) {
+        let speech = AVSpeechUtterance(string: message)
+        speech.voice = AVSpeechSynthesisVoice(language: "en-US")
+        speech.rate = 0.45
+        speech.volume = 1.0
+        synthesizer.speak(speech)
+        lastFeedback = Date()
     }
 }
