@@ -110,5 +110,16 @@ struct TrainingView : View {
         .padding()
         .navigationTitle("Training")
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            // Start feedback evaluation loop
+            timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) {
+                _ in feedback.evaluate(currentHeartRate: hrService.heartRate, zone: zone, userMaxHeartRate: userMaxHeartRate)
+            }
+        }
+        .onDisappear {
+            // Clean up timer and BLE when leaving view
+            timer?.invalidate()
+            hrService.stopScanning()
+        }
     }
 }
