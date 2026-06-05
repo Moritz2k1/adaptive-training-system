@@ -8,6 +8,8 @@
 import Foundation
 
 struct TrainingZoneModel : Identifiable {
+    
+    // Properties
     let id: Int
     let name: String
     let description: String
