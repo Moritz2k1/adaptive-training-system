@@ -34,7 +34,7 @@ class CoreBluetoothService : NSObject, ObservableObject, HeartRateService {
         super .init()
         
         // Starts Core Bluetooth
-        centralManager = CBCentralManager(delegate: self, queue: DispatchQueue.main)
+        centralManager = CBCentralManager(delegate: self, queue: .main)
     }
     
     func startScanning() {
@@ -115,7 +115,7 @@ extension CoreBluetoothService: CBCentralManagerDelegate {
                         rssi RSSI: NSNumber) {
         
         // Guard constant for name
-        guard let peripheralName = peripheral.name, peripheralName.contains("Polar") else { return }
+        guard let peripheralName = peripheral.name, Configuration.supportedDevices.contains(where: { device in peripheralName.contains(device) }) else { return }
         
         self.peripheral = peripheral
         statusText = "Device found: \(peripheralName)"
