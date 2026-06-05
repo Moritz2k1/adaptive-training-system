@@ -10,7 +10,7 @@ import SwiftUI
 struct ContentView: View {
     
     // Get class
-    @StateObject var HRManager = HeartRateManager()
+    @StateObject var HRManager = HeartRateService()
     
     var body: some View {
         VStack(spacing: 30) {
