@@ -90,7 +90,7 @@ struct ZoneSelectionView : View {
                         .cornerRadius(12)
                 }
             }
-                .padding()
+            .padding()
             .navigationTitle("Setup")
         }
     }
