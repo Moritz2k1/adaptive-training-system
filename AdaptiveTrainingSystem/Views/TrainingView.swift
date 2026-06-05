@@ -62,4 +62,53 @@ struct TrainingView : View {
             return "Keep it up"
         }
     }
+    
+    var body: some View {
+        VStack(spacing: 30) {
+            
+            // Zone Info
+            VStack(spacing: 4) {
+                Text("\(zone.name) - \(zone.description)")
+                    .font(.headline)
+                Text("Target \(zoneMin) - \(zoneMax) bpm")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            }
+            .padding()
+            .background(Color(.systemGray6))
+            .cornerRadius(12)
+            
+            // Heart Rate Display
+            VStack(spacing: 4) {
+                // Shows when no data is available yet
+                Text(hrService.heartRate > 0 ? "\(hrService.heartRate)" : "--")
+                    .font(.system(size: 90, weight: .bold))
+                    .foregroundColor(heartRateColor)
+                Text("bpm")
+                    .foregroundColor(.secondary)
+            }
+            
+            // Status
+            Text(statusLabel)
+                .font(.title3)
+                .foregroundColor(heartRateColor)
+            
+            // BLE Status
+            Text(hrService.statusText)
+                .font(.caption)
+                .foregroundColor(.secondary)
+            
+            // Scan button, which is only visible when not connected
+            if (!hrService.isConnected) {
+                Button(hrService.isScanning ? "Searching..." : "Connect Device") {
+                    hrService.startScanning()
+                }
+                .buttonStyle(.borderedProminent)
+                .disabled(hrService.isScanning)
+            }
+        }
+        .padding()
+        .navigationTitle("Training")
+        .navigationBarTitleDisplayMode(.inline)
+    }
 }
