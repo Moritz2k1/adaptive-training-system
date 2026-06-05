@@ -8,28 +8,33 @@
 import CoreBluetooth
 import Combine
 
-class CoreBluetoothService : NSObject, HeartRateService, ObservableObject {
+class CoreBluetoothService : NSObject, ObservableObject, HeartRateService {
     
-    // Constants
-    let HEART_RATE_SERVICE = CBUUID(string: "180D")
-    let BT_CHARACTERISTIC = CBUUID(string: "2A37")
+    // Constants - UUIDs
+    private let HEART_RATE_SERVICE = CBUUID(string: "180D")
+    private let BT_CHARACTERISTIC = CBUUID(string: "2A37")
     
     // Variables
     private var centralManager : CBCentralManager!
     private var peripheral : CBPeripheral?
     
     // Observables in the UI
-    @Published var statusText: String = "Ready"
-    @Published var heartRate: Int = 0
-    @Published var rrIntervals: [Double] = []
-    @Published var isConnected: Bool = false
-    @Published var isScanning: Bool = false
+    @Published private(set) var statusText: String = "Ready"
+    @Published private(set) var heartRate: Int = 0
+    @Published private(set) var rrIntervals: [Double] = []
+    @Published private(set) var isConnected: Bool = false
+    @Published private(set) var isScanning: Bool = false
+    
+    // Publisher Conformance -> Must be used because of Protocol
+    var heartRatePublisher: AnyPublisher<Int, Never> { $heartRate.eraseToAnyPublisher() }
+    var rrIntervalsPublisher: AnyPublisher<[Double], Never> { $rrIntervals.eraseToAnyPublisher() }
+    var isConnectedPublisher: AnyPublisher<Bool, Never> { $isConnected.eraseToAnyPublisher() }
     
     override init() {
         super .init()
         
         // Starts Core Bluetooth
-        centralManager = CBCentralManager(delegate: self, queue: nil)
+        centralManager = CBCentralManager(delegate: self, queue: DispatchQueue.main)
     }
     
     func startScanning() {
@@ -39,7 +44,7 @@ class CoreBluetoothService : NSObject, HeartRateService, ObservableObject {
         }
         
         isScanning = true
-        statusText = "Searching for Polar H10"
+        statusText = "Searching for device..."
         // Only look for devices with HR services
         centralManager.scanForPeripherals(withServices: [HEART_RATE_SERVICE])
     }
@@ -87,7 +92,7 @@ class CoreBluetoothService : NSObject, HeartRateService, ObservableObject {
     }
 }
 
-extension HeartRateManager: CBCentralManagerDelegate {
+extension CoreBluetoothService: CBCentralManagerDelegate {
     
     // Called when Bluetooth status changes
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
@@ -98,8 +103,6 @@ extension HeartRateManager: CBCentralManagerDelegate {
             statusText = "Bluetooth powered off"
         case .unauthorized:
             statusText = "Bluetooth not authorized"
-        case .unsupported:
-            statusText = "Bluetooth unsupported"
         default:
             statusText = "Bluetooth not available"
         }
@@ -112,11 +115,11 @@ extension HeartRateManager: CBCentralManagerDelegate {
                         rssi RSSI: NSNumber) {
         
         // Guard constant for name
-        guard let peripheralName = peripheral.name, peripheralName.contains("Polar H10") else { return }
+        guard let peripheralName = peripheral.name, peripheralName.contains("Polar") else { return }
         
-        statusText = "H10 found: \(peripheralName)"
-        peripheral = peripheral
-        centralManager.stopScan()
+        self.peripheral = peripheral
+        statusText = "Device found: \(peripheralName)"
+        stopScanning()
         
         // Direct connection
         centralManager.connect(peripheral)
@@ -141,7 +144,7 @@ extension HeartRateManager: CBCentralManagerDelegate {
     }
 }
 
-extension HeartRateManager: CBPeripheralDelegate {
+extension CoreBluetoothService: CBPeripheralDelegate {
     
     // Service found
     func peripheral(_ peripheral: CBPeripheral,
