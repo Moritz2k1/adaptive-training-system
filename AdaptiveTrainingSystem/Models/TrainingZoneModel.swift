@@ -22,6 +22,14 @@ struct TrainingZoneModel : Identifiable {
         Int(Double(userMaxHeartRate) * maxPercent)
     }
     
+    func containsHeartRate(_ heartRate: Int, maxHeartRate: Int) -> Bool {
+        let percentage = Double(heartRate) / Double(maxHeartRate)
+        if (id == 5) {
+            return percentage >= minPercent && percentage <= maxPercent
+        }
+        return percentage >= minPercent && percentage < maxPercent
+    }
+    
     static let ZoneModels: [TrainingZoneModel] = [
         // Zone 1
         TrainingZoneModel(
