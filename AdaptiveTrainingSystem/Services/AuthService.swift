@@ -54,4 +54,24 @@ class AuthService: ObservableObject {
         currentUser = user
         persistSession(userID: user.id)
     }
+    
+    func login(email: String, password: String) throws {
+        
+        let descriptor = FetchDescriptor<User>(
+            predicate: #Predicate { $0.email == email }
+        )
+        
+        let users = try modelContext.fetch(descriptor)
+        
+        guard let user = users.first else { throw AuthError.userNotFound }
+        guard user.password == hash(password) else { throw AuthError.wrongPassword }
+        
+        currentUser = user
+        persistSession(userID: user.id)
+    }
+    
+    func logout() {
+        currentUser = nil
+        UserDefaults.standard.removeObject(forKey: "currentUserID")
+    }
 }
