@@ -7,6 +7,7 @@
 
 import Foundation
 
+// Errors thrown during login/register
 enum AuthError: LocalizedError {
     case emailAlreadyExists
     case userNotFound
