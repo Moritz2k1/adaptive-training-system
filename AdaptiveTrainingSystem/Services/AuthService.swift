@@ -37,6 +37,17 @@ class AuthService: ObservableObject {
         UserDefaults.standard.set(userID.uuidString, forKey: "currentUserID")
     }
     
+    private func restoreSession() {
+        guard let idString = UserDefaults.standard.string(forKey: "currentUserID"),
+              let uuid = UUID(uuidString: idString) else { return }
+        
+        let descriptor = FetchDescriptor<User>(
+            predicate: #Predicate { $0.id == uuid }
+        )
+        
+        currentUser = try? modelContext.fetch(descriptor).first
+    }
+    
     func register(username: String, email: String, password: String) throws {
         
         // Check if email is already taken
