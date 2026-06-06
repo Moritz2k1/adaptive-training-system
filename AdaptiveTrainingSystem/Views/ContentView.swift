@@ -8,8 +8,17 @@
 import SwiftUI
 
 struct ContentView : View {
+    
+    @EnvironmentObject var authService: AuthService
+    
     var body: some View {
-        ZoneSelectionView()
+        // Show auth flow or app based on login state
+        if (authService.isLoggedIn) {
+            ZoneSelectionView()
+        } else {
+            LoginView()
+        }
+        
     }
 }
 
