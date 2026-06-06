@@ -9,11 +9,17 @@ import SwiftUI
 
 struct LoginView: View {
     
+    // Auth service injected from environment
+    // Handles registration logic
     @EnvironmentObject var authService: AuthService
     
     @State private var email: String = ""
     @State private var password: String = ""
+    
+    // Holds error messages from failed login attempt
     @State private var errorMessage: String = ""
+    
+    // Controls navigation to RegisterView
     @State private var goToRegister: Bool = false
     
     var body: some View {
@@ -25,18 +31,18 @@ struct LoginView: View {
                     .bold()
                     .padding(.bottom, 8)
                 
-                // Email
+                // Email field
                 TextField("Email", text: $email)
                     .textFieldStyle(.roundedBorder)
                     .keyboardType(.emailAddress)
                     .autocorrectionDisabled(true)
                     .textInputAutocapitalization(.never)
                 
-                // Password
+                // Password field
                 SecureField("Password", text: $password)
                     .textFieldStyle(.roundedBorder)
                 
-                // Error
+                // Error message from failed login attempt
                 if (!errorMessage.isEmpty) {
                     Text(errorMessage)
                         .foregroundColor(.red)
@@ -45,10 +51,12 @@ struct LoginView: View {
                 }
                 
                 // Login Button
+                // Disabled until both fields are filled
                 Button("Log in") {
                     do {
                         try authService.login(email: email, password: password)
                     } catch {
+                        // Surface error from AuthService to user
                         errorMessage = error.localizedDescription
                     }
                 }
@@ -64,6 +72,9 @@ struct LoginView: View {
                 .foregroundColor(.secondary)
             }
             .padding()
+            .navigationDestination(isPresented: $goToRegister) {
+                RegisterView()
+            }
         }
     }
 }
