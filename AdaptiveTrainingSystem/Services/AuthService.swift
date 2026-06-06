@@ -32,4 +32,26 @@ class AuthService: ObservableObject {
         let hashed = SHA256.hash(data: data)
         return hashed.compactMap { String(format: "%02x", $0) }.joined()
     }
+    
+    private func persistSession(userID: UUID) {
+        UserDefaults.standard.set(userID.uuidString, forKey: "currentUserID")
+    }
+    
+    func register(username: String, email: String, password: String) throws {
+        
+        // Check if email is already taken
+        let descriptor = FetchDescriptor<User>(
+            predicate: #Predicate { $0.email == email }
+        )
+        
+        let existingUser = try modelContext.fetch(descriptor)
+        guard existingUser.isEmpty else { throw AuthError.emailAlreadyExists }
+        
+        let user = User(username: username, email: email, password: hash(password))
+        modelContext.insert(user)
+        try modelContext.save()
+        
+        currentUser = user
+        persistSession(userID: user.id)
+    }
 }
