@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct TrainingZoneModel : Identifiable {
+struct TrainingZone : Identifiable {
     
     // Properties
     let id: Int
@@ -32,9 +32,9 @@ struct TrainingZoneModel : Identifiable {
         return percentage >= minPercent && percentage < maxPercent
     }
     
-    static let ZoneModels: [TrainingZoneModel] = [
+    static let zones: [TrainingZone] = [
         // Zone 1
-        TrainingZoneModel(
+        TrainingZone(
             id: 1,
             name: "Zone 1",
             description: "Recovery",
@@ -43,7 +43,7 @@ struct TrainingZoneModel : Identifiable {
         ),
         
         // Zone 2
-        TrainingZoneModel(
+        TrainingZone(
             id: 2,
             name: "Zone 2",
             description: "Endurance",
@@ -52,7 +52,7 @@ struct TrainingZoneModel : Identifiable {
         ),
         
         // Zone 3
-        TrainingZoneModel(
+        TrainingZone(
             id: 3,
             name: "Zone 3",
             description: "Aerobic",
@@ -61,7 +61,7 @@ struct TrainingZoneModel : Identifiable {
         ),
         
         // Zone 4
-        TrainingZoneModel(
+        TrainingZone(
             id: 4,
             name: "Zone 4",
             description: "Threshold",
@@ -70,7 +70,7 @@ struct TrainingZoneModel : Identifiable {
         ),
         
         // Zone 5
-        TrainingZoneModel(
+        TrainingZone(
             id: 5,
             name: "Zone 5",
             description: "Maximum",

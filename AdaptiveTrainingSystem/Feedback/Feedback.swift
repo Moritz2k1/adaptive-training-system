@@ -19,7 +19,7 @@ class Feedback : ObservableObject {
     private var lastFeedback: Date = .distantPast
     
     // Compares current HR against zone boundaries and triggers audio feedback
-    func evaluate(currentHeartRate: Int, zone: TrainingZoneModel, userMaxHeartRate: Int) {
+    func evaluate(currentHeartRate: Int, zone: TrainingZone, userMaxHeartRate: Int) {
         
         // Compute absolute BPM boundaries for selected zone
         let zoneMin = zone.minHeartRate(userMaxHeartRate: userMaxHeartRate)

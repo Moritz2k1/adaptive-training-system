@@ -13,7 +13,7 @@ struct ZoneSelectionView : View {
     @State private var age = Configuration.age
     
     // Current selected training zone (default is zone 2)
-    @State private var selectedZone = TrainingZoneModel.ZoneModels[1]
+    @State private var selectedZone = TrainingZone.zones[1]
     
     // Estimated max HR using following formula: 220 - age
     var userMaxHeartRate: Int { 220 - age }
@@ -45,7 +45,7 @@ struct ZoneSelectionView : View {
                         .font(.headline)
                     
                     // Renders a row for each available training zone
-                    ForEach(TrainingZoneModel.ZoneModels) {
+                    ForEach(TrainingZone.zones) {
                         zone in HStack {
                             VStack(alignment: .leading, spacing: 2) {
                                 

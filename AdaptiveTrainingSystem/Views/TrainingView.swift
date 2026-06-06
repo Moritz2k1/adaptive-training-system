@@ -10,7 +10,7 @@ import SwiftUI
 struct TrainingView : View {
     
     // Selected zone and max HR passed from ZoneSelectionView
-    let zone: TrainingZoneModel
+    let zone: TrainingZone
     let userMaxHeartRate: Int
     
     // Services

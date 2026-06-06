@@ -37,6 +37,7 @@ class AuthService: ObservableObject {
         UserDefaults.standard.set(userID.uuidString, forKey: "currentUserID")
     }
     
+    // Restore session after app restart
     private func restoreSession() {
         guard let idString = UserDefaults.standard.string(forKey: "currentUserID"),
               let uuid = UUID(uuidString: idString) else { return }
