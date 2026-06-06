@@ -7,13 +7,14 @@
 
 import Foundation
 
-// Errors thrown during login/register
+// Errors thrown during authentication
 enum AuthError: LocalizedError {
     case emailAlreadyExists
     case userNotFound
     case wrongPassword
     case unknown
     
+    // Descriptions shown in UI
     var errorDescription: String? {
         switch self {
         case .emailAlreadyExists: return "An account with this email already exists"
