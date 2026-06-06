@@ -73,6 +73,14 @@ struct RegisterView: View {
             .buttonStyle(.borderedProminent)
             .frame(maxWidth: .infinity)
             .disabled(!isFormValid)
+            
+            Button("Already have an account? Log in") {
+                dismiss()
+            }
+            .font(.footnote)
+            .foregroundColor(.secondary)
         }
+        .padding()
+        .navigationBarBackButtonHidden(true)
     }
 }
